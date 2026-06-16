@@ -1,0 +1,394 @@
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EVERPEAK Visuals™ Photography</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link rel="icon" type="image/png" href="https://base44.app/api/apps/69cf22949128034e60e5d657/files/mp/public/69cf22949128034e60e5d657/e3eac19a5_Everpeakweb.png">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,200;0,300;0,400;1,200;1,300&amp;family=Josefin+Sans:wght@100;200;300&amp;display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream: #f5f0e8; --charcoal: #1a1a18;
+      --warm-dark: #2a2520; --gold: #c8a96e; --gold-light: #e8d5a3;
+      --stone: #8a7d6e;
+    }
+
+    body {
+      font-family: 'Josefin Sans', sans-serif;
+      background: var(--charcoal);
+      color: var(--cream);
+      min-height: 100vh;
+    }
+
+    /* ============================================
+       SPLASH SCREEN
+    ============================================ */
+    #splash {
+      position: fixed;
+      inset: 0;
+      background: var(--charcoal);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Background image that will slowly reveal */
+    .splash-bg {
+      position: absolute;
+      inset: 0;
+      background: url('https://base44.app/api/apps/69cf22949128034e60e5d657/files/mp/public/69cf22949128034e60e5d657/752c19e9c_IMG_7222.jpg') center/cover no-repeat;
+      opacity: 0;
+      transform: scale(1.08);
+      transition: opacity 1.8s ease 0.5s, transform 3s ease 0.5s;
+    }
+    .splash-bg.reveal {
+      opacity: 0.35;
+      transform: scale(1.0);
+    }
+
+    /* Dark overlay on top of bg */
+    .splash-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(26,26,24,0.4) 0%, rgba(26,26,24,0.95) 100%);
+    }
+
+    /* Horizontal lines that sweep in */
+    .splash-lines {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .splash-line {
+      position: absolute;
+      left: 0; right: 0;
+      height: 1px;
+      background: rgba(200,169,110,0.12);
+      transform: scaleX(0);
+      transform-origin: left;
+    }
+    .splash-line:nth-child(1) { top: 20%; transition: transform 0.8s ease 0.2s; }
+    .splash-line:nth-child(2) { top: 80%; transition: transform 0.8s ease 0.35s; }
+    .splash-lines.show .splash-line { transform: scaleX(1); }
+
+    /* Vertical accent lines */
+    .splash-vline {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 1px;
+      background: rgba(200,169,110,0.12);
+      transform: scaleY(0);
+      transform-origin: top;
+    }
+    .splash-vline:nth-child(3) { left: 12%; transition: transform 0.8s ease 0.5s; }
+    .splash-vline:nth-child(4) { right: 12%; transition: transform 0.8s ease 0.5s; }
+    .splash-lines.show .splash-vline { transform: scaleY(1); }
+
+    /* CONTENT */
+    .splash-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Pre-logo line */
+    .splash-pre-line {
+      width: 0;
+      height: 1px;
+      background: var(--gold);
+      margin: 0 auto 30px;
+      transition: width 0.8s ease 0.1s;
+    }
+    .splash-pre-line.show { width: 60px; }
+
+    /* Logo */
+    .splash-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3.5rem, 10vw, 8rem);
+      font-weight: 200;
+      letter-spacing: 0.18em;
+      color: var(--cream);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.9s ease 0.4s, transform 0.9s ease 0.4s;
+      line-height: 1;
+    }
+    .splash-logo span { color: var(--gold); }
+    .splash-logo.show { opacity: 1; transform: translateY(0); }
+
+    /* Tagline */
+    .splash-tagline {
+      font-size: clamp(0.55rem, 1.5vw, 0.7rem);
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: var(--stone);
+      margin-top: 20px;
+      opacity: 0;
+      transition: opacity 0.8s ease 0.9s;
+    }
+    .splash-tagline.show { opacity: 1; }
+
+    /* Loading bar */
+    .splash-loader {
+      width: 200px;
+      height: 1px;
+      background: rgba(200,169,110,0.2);
+      margin-top: 60px;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity 0.4s ease 1s;
+    }
+    .splash-loader.show { opacity: 1; }
+    .splash-loader-fill {
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      background: var(--gold);
+      width: 0%;
+      transition: width 2.2s cubic-bezier(0.4, 0, 0.2, 1) 1.1s;
+    }
+    .splash-loader-fill.load { width: 100%; }
+
+    /* Counter */
+    .splash-counter {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.9rem;
+      font-weight: 200;
+      color: var(--stone);
+      margin-top: 16px;
+      letter-spacing: 0.1em;
+      opacity: 0;
+      transition: opacity 0.4s ease 1s;
+    }
+    .splash-counter.show { opacity: 1; }
+
+    /* Decorative corner brackets */
+    .corner {
+      position: absolute;
+      width: 40px; height: 40px;
+      opacity: 0;
+      transition: opacity 0.5s ease 0.6s;
+    }
+    .corner.show { opacity: 1; }
+    .corner-tl { top: 18%; left: 13%; border-top: 1px solid rgba(200,169,110,0.4); border-left: 1px solid rgba(200,169,110,0.4); }
+    .corner-tr { top: 18%; right: 13%; border-top: 1px solid rgba(200,169,110,0.4); border-right: 1px solid rgba(200,169,110,0.4); }
+    .corner-bl { bottom: 18%; left: 13%; border-bottom: 1px solid rgba(200,169,110,0.4); border-left: 1px solid rgba(200,169,110,0.4); }
+    .corner-br { bottom: 18%; right: 13%; border-bottom: 1px solid rgba(200,169,110,0.4); border-right: 1px solid rgba(200,169,110,0.4); }
+
+    /* SPLASH EXIT */
+    #splash.exit {
+      clip-path: inset(0 0 0 0);
+      transition: clip-path 1s cubic-bezier(0.76, 0, 0.24, 1) 0s;
+    }
+    #splash.exit-active {
+      clip-path: inset(0 0 100% 0);
+    }
+
+    /* ============================================
+       POST-SPLASH CONTENT (the actual page)
+    ============================================ */
+    #main-content {
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px;
+    }
+    #main-content.visible { opacity: 1; }
+    .demo-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem; font-weight: 300;
+      color: var(--cream); margin-bottom: 30px;
+    }
+    .demo-logo span { color: var(--gold); }
+    .demo-text {
+      font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--stone); margin-bottom: 50px; line-height: 2.5;
+    }
+    .demo-text strong { color: var(--gold); display: block; font-size: 0.9rem; letter-spacing: 0.08em; text-transform: none; font-family: 'Cormorant Garamond', serif; font-weight: 300; font-style: italic; margin-bottom: 10px; }
+    .demo-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn-replay {
+      font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase;
+      background: var(--gold); color: var(--charcoal);
+      border: none; padding: 14px 30px; cursor: pointer;
+      font-family: 'Josefin Sans', sans-serif;
+      transition: background 0.3s;
+    }
+    .btn-replay:hover { background: var(--gold-light); }
+    .btn-site {
+      font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase;
+      color: var(--cream); background: none;
+      border: 1px solid rgba(200,169,110,0.4); padding: 14px 30px; cursor: pointer;
+      font-family: 'Josefin Sans', sans-serif; text-decoration: none;
+      transition: border-color 0.3s, color 0.3s;
+    }
+    .btn-site:hover { border-color: var(--gold); color: var(--gold); }
+
+    .info-box {
+      margin-top: 60px;
+      padding: 40px 50px;
+      border: 1px solid rgba(200,169,110,0.15);
+      background: var(--warm-dark);
+      max-width: 600px;
+      text-align: left;
+    }
+    .info-box h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem; font-weight: 300;
+      color: var(--gold); margin-bottom: 16px;
+    }
+    .info-box p { font-size: 0.67rem; line-height: 2.1; color: var(--stone); letter-spacing: 0.06em; }
+    .info-box ul { list-style: none; margin-top: 14px; }
+    .info-box li { font-size: 0.65rem; letter-spacing: 0.08em; color: var(--stone); padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 12px; }
+    .info-box li::before { content: '→'; color: var(--gold); }
+  </style>
+</head>
+<body>
+
+  <!-- ===== SPLASH SCREEN ===== -->
+  <div id="splash" class="exit exit-active" style="display: none;">
+    <div class="splash-bg reveal" id="splashBg"></div>
+    <div class="splash-overlay"></div>
+
+    <!-- Grid lines -->
+    <div class="splash-lines show" id="splashLines">
+      <div class="splash-line"></div>
+      <div class="splash-line"></div>
+      <div class="splash-vline"></div>
+      <div class="splash-vline"></div>
+    </div>
+
+    <!-- Corner brackets -->
+    <div class="corner corner-tl show" id="corners1"></div>
+    <div class="corner corner-tr show" id="corners2"></div>
+    <div class="corner corner-bl show" id="corners3"></div>
+    <div class="corner corner-br show" id="corners4"></div>
+
+    <div class="splash-content">
+      <div class="splash-pre-line show" id="preLine"></div>
+
+      <div class="splash-logo show" id="splashLogo">
+        EVER<span>PEAK</span> Visuals™
+      </div>
+
+      <div class="splash-tagline show" id="splashTagline">
+        Fine Art Photography
+      </div>
+
+      <div class="splash-loader show" id="splashLoader">
+        <div class="splash-loader-fill load" id="loaderFill" style="transition: width 2.2s cubic-bezier(0.4, 0, 0.2, 1); width: 0%;"></div>
+      </div>
+
+      <div class="splash-counter show" id="splashCounter">100%</div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN PAGE AFTER SPLASH ===== -->
+  <div id="main-content" class="visible">
+    <div class="demo-logo">EVER<span>PEAK</span> Visuals™</div>
+    <div class="demo-text">
+      <strong>Loading completed — welcome to EVERPEAK Visuals™.</strong>
+      Quality-over-quantity photography, for people like you.</div>
+
+    <div class="demo-buttons">
+      
+      <a href="home.html" class="btn-site">Go to Website →</a>
+    </div>
+
+    
+  </div>
+
+  <script>
+    function runSplash(onDone) {
+      const splash = document.getElementById('splash');
+      const bg = document.getElementById('splashBg');
+      const lines = document.getElementById('splashLines');
+      const corners = document.querySelectorAll('.corner');
+      const preLine = document.getElementById('preLine');
+      const logo = document.getElementById('splashLogo');
+      const tagline = document.getElementById('splashTagline');
+      const loader = document.getElementById('splashLoader');
+      const fill = document.getElementById('loaderFill');
+      const counter = document.getElementById('splashCounter');
+
+      // Reset
+      splash.style.display = 'flex';
+      splash.classList.remove('exit', 'exit-active');
+      bg.classList.remove('reveal');
+      lines.classList.remove('show');
+      corners.forEach(c => c.classList.remove('show'));
+      preLine.classList.remove('show');
+      logo.classList.remove('show');
+      tagline.classList.remove('show');
+      loader.classList.remove('show');
+      fill.classList.remove('load');
+      counter.classList.remove('show');
+      fill.style.transition = 'none';
+      fill.style.width = '0%';
+
+      // Animate
+      setTimeout(() => {
+        bg.classList.add('reveal');
+        lines.classList.add('show');
+        corners.forEach(c => c.classList.add('show'));
+      }, 100);
+
+      setTimeout(() => { preLine.classList.add('show'); }, 200);
+      setTimeout(() => { logo.classList.add('show'); }, 400);
+      setTimeout(() => { tagline.classList.add('show'); }, 900);
+      setTimeout(() => {
+        loader.classList.add('show');
+        counter.classList.add('show');
+        // Re-enable transition
+        fill.style.transition = 'width 2.2s cubic-bezier(0.4,0,0.2,1)';
+        setTimeout(() => fill.classList.add('load'), 50);
+      }, 1100);
+
+      // Count up
+      let n = 0;
+      const countInterval = setInterval(() => {
+        n = Math.min(n + Math.floor(Math.random() * 8) + 3, 100);
+        counter.textContent = n + '%';
+        if (n >= 100) { counter.textContent = '100%'; clearInterval(countInterval); }
+      }, 80);
+
+      // Exit
+      setTimeout(() => {
+        splash.classList.add('exit');
+        setTimeout(() => {
+          splash.classList.add('exit-active');
+          setTimeout(() => {
+            splash.style.display = 'none';
+            if (onDone) onDone();
+          }, 1100);
+        }, 50);
+      }, 3600);
+    }
+
+    function replaySplash() {
+      const main = document.getElementById('main-content');
+      main.classList.remove('visible');
+      runSplash(() => {
+        main.classList.add('visible');
+      });
+    }
+
+    // Auto run on load
+    const main = document.getElementById('main-content');
+    runSplash(() => { main.classList.add('visible'); });
+  </script>
+
+
+</body></html>
